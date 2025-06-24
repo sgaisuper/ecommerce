@@ -126,20 +126,56 @@ export default function Home() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">WhatsApp Integration Status</h3>
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="h-3 w-3 bg-yellow-400 rounded-full"></div>
-              <span className="text-gray-700">WhatsApp Business API - Configuration Required</span>
+              <div className="h-3 w-3 bg-green-400 rounded-full"></div>
+              <span className="text-gray-700">WhatsApp Business API - Webhook Configured</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="h-3 w-3 bg-yellow-400 rounded-full"></div>
               <span className="text-gray-700">Product Catalog Sync - Pending Setup</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-3 w-3 bg-yellow-400 rounded-full"></div>
+              <div className="h-3 w-3 bg-green-400 rounded-full"></div>
               <span className="text-gray-700">Webhook Configuration - Ready for Testing</span>
             </div>
           </div>
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">Test WhatsApp Messaging</h4>
+            <p className="text-sm text-blue-700 mb-3">
+              Test your WhatsApp integration by sending a message to your phone number.
+            </p>
+            <button
+              onClick={async () => {
+                const phone = prompt('Enter your phone number (with country code, e.g., +1234567890):');
+                if (!phone) return;
+                
+                try {
+                  const response = await fetch('/api/test-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      to: phone,
+                      message: 'Hello! This is a test message from your WhatsApp ecommerce app 🛍️'
+                    })
+                  });
+                  
+                  const result = await response.json();
+                  
+                  if (result.success) {
+                    alert('✅ Message sent successfully! Check your WhatsApp.');
+                  } else {
+                    alert('❌ Failed to send message: ' + result.error);
+                  }
+                } catch (error) {
+                  alert('❌ Error: ' + error);
+                }
+              }}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+            >
+              Send Test Message
+            </button>
+          </div>
           <p className="text-sm text-gray-600 mt-4">
-            Configure your WhatsApp Business API credentials in the .env.local file to enable full integration.
+            Add your WhatsApp Business API credentials in Vercel environment variables to enable messaging.
           </p>
         </div>
       </main>
