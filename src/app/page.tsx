@@ -209,7 +209,7 @@ export default function Home() {
               </button>
             </div>
             <p className="text-xs text-blue-600 mt-2">
-              Template messages use the approved "hello_world" template and should work immediately.
+              Template messages use the approved &quot;hello_world&quot; template and should work immediately.
             </p>
           </div>
           <p className="text-sm text-gray-600 mt-4">
