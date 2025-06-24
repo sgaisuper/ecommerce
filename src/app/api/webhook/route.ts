@@ -26,11 +26,10 @@ export async function POST(request: NextRequest) {
         entry.changes?.forEach((change) => {
           if (change.field === 'messages') {
             const messages = change.value.messages;
-            const contacts = change.value.contacts;
             
             messages?.forEach((message: WhatsAppMessage) => {
               console.log('Received message:', message);
-              handleIncomingMessage(message, contacts || []);
+              handleIncomingMessage(message);
             });
           }
         });
@@ -44,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleIncomingMessage(message: WhatsAppMessage, _contacts: { wa_id: string; profile?: { name: string } }[]) {
+async function handleIncomingMessage(message: WhatsAppMessage) {
   if (message.type === 'text') {
     const textBody = message.text?.body?.toLowerCase();
     
