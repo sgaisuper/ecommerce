@@ -22,7 +22,13 @@ export async function POST(request: NextRequest) {
       {
         messaging_product: 'whatsapp',
         to: to,
-        text: { body: message }
+        type: 'template',
+        template: {
+          name: 'hello_world',
+          language: {
+            code: 'en_US'
+          }
+        }
       },
       {
         headers: {

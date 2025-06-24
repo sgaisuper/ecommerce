@@ -141,40 +141,76 @@ export default function Home() {
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <h4 className="font-medium text-blue-900 mb-2">Test WhatsApp Messaging</h4>
             <p className="text-sm text-blue-700 mb-3">
-              Test your WhatsApp integration by sending a message to your phone number.
+              Test your WhatsApp integration using approved template messages.
             </p>
-            <button
-              onClick={async () => {
-                const phone = prompt('Enter your phone number (with country code, e.g., +1234567890):');
-                if (!phone) return;
-                
-                try {
-                  const response = await fetch('/api/test-message', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      to: phone,
-                      message: 'Hello! This is a test message from your WhatsApp ecommerce app 🛍️'
-                    })
-                  });
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  const phone = prompt('Enter your phone number (with country code, e.g., +1234567890):');
+                  if (!phone) return;
                   
-                  const result = await response.json();
-                  
-                  if (result.success) {
-                    alert('✅ Message sent successfully! Check your WhatsApp.');
-                  } else {
-                    console.error('Full error details:', result);
-                    const debugInfo = result.debug ? '\n\nDebug Info:\n' + JSON.stringify(result.debug, null, 2) : '';
-                    alert('❌ Failed to send message: ' + result.error + debugInfo);
+                  try {
+                    const response = await fetch('/api/test-message', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        to: phone,
+                        message: 'Hello! This is a test message from your WhatsApp ecommerce app 🛍️'
+                      })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                      alert('✅ Template message sent successfully! Check your WhatsApp.');
+                    } else {
+                      console.error('Full error details:', result);
+                      const debugInfo = result.debug ? '\n\nDebug Info:\n' + JSON.stringify(result.debug, null, 2) : '';
+                      alert('❌ Failed to send message: ' + result.error + debugInfo);
+                    }
+                  } catch (error) {
+                    alert('❌ Error: ' + error);
                   }
-                } catch (error) {
-                  alert('❌ Error: ' + error);
-                }
-              }}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-            >
-              Send Test Message
-            </button>
+                }}
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+              >
+                Send Template Message
+              </button>
+              <button
+                onClick={async () => {
+                  const phone = prompt('Enter your phone number (just numbers, no + or country code):');
+                  if (!phone) return;
+                  
+                  try {
+                    const response = await fetch('/api/test-direct', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        to: phone,
+                        message: 'Direct API test'
+                      })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                      alert('✅ Direct API call successful! Check your WhatsApp.');
+                    } else {
+                      console.error('Direct API error:', result);
+                      alert('❌ Direct API failed: ' + JSON.stringify(result.debug, null, 2));
+                    }
+                  } catch (error) {
+                    alert('❌ Error: ' + error);
+                  }
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+              >
+                Test Direct API
+              </button>
+            </div>
+            <p className="text-xs text-blue-600 mt-2">
+              Template messages use the approved "hello_world" template and should work immediately.
+            </p>
           </div>
           <p className="text-sm text-gray-600 mt-4">
             Add your WhatsApp Business API credentials in Vercel environment variables to enable messaging.

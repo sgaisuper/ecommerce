@@ -34,6 +34,35 @@ export class WhatsAppAPI {
     }
   }
 
+  async sendTemplateMessage(to: string, templateName: string = 'hello_world', languageCode: string = 'en_US') {
+    try {
+      const response = await axios.post(
+        `${WHATSAPP_API_URL}/${this.phoneNumberId}/messages`,
+        {
+          messaging_product: 'whatsapp',
+          to: to,
+          type: 'template',
+          template: {
+            name: templateName,
+            language: {
+              code: languageCode
+            }
+          }
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error sending template message:', error);
+      throw error;
+    }
+  }
+
   async sendCatalogMessage(to: string, catalogId: string) {
     try {
       const response = await axios.post(

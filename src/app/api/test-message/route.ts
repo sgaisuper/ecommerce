@@ -34,9 +34,10 @@ export async function POST(request: NextRequest) {
     }
 
     const whatsapp = new WhatsAppAPI();
-    console.log('Attempting to send message...');
+    console.log('Attempting to send template message...');
     
-    const result = await whatsapp.sendMessage(to, message);
+    // Use template message for first contact (required by WhatsApp)
+    const result = await whatsapp.sendTemplateMessage(to);
     
     console.log('Message sent successfully:', result);
     
