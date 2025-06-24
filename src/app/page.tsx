@@ -163,7 +163,9 @@ export default function Home() {
                   if (result.success) {
                     alert('✅ Message sent successfully! Check your WhatsApp.');
                   } else {
-                    alert('❌ Failed to send message: ' + result.error);
+                    console.error('Full error details:', result);
+                    const debugInfo = result.debug ? '\n\nDebug Info:\n' + JSON.stringify(result.debug, null, 2) : '';
+                    alert('❌ Failed to send message: ' + result.error + debugInfo);
                   }
                 } catch (error) {
                   alert('❌ Error: ' + error);
