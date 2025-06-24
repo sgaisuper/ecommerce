@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
       message: error instanceof Error ? error.message : 'Unknown error',
       name: error instanceof Error ? error.name : 'Unknown',
       stack: error instanceof Error ? error.stack : undefined,
-      response: (error as any)?.response?.data || null,
-      status: (error as any)?.response?.status || null,
-      statusText: (error as any)?.response?.statusText || null
+      response: (error as { response?: { data?: unknown } })?.response?.data || null,
+      status: (error as { response?: { status?: number } })?.response?.status || null,
+      statusText: (error as { response?: { statusText?: string } })?.response?.statusText || null
     };
     
     return NextResponse.json({ 
