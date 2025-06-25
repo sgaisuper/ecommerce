@@ -32,6 +32,8 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>(sampleProducts);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
+  const [catalogId, setCatalogId] = useState<string>('');
+  const [syncingCatalog, setSyncingCatalog] = useState(false);
 
   const handleAddProduct = (productData: Omit<Product, 'id'>) => {
     const newProduct: Product = {
@@ -70,6 +72,57 @@ export default function Home() {
     setEditingProduct(undefined);
   };
 
+  const syncToWhatsAppCatalog = async () => {
+    if (!catalogId.trim()) {
+      alert('Please enter your WhatsApp Catalog ID first');
+      return;
+    }
+
+    setSyncingCatalog(true);
+    try {
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const product of products) {
+        try {
+          const response = await fetch('/api/catalog', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'create_product',
+              catalogId: catalogId.trim(),
+              product: {
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                currency: product.currency,
+                availability: product.availability,
+                imageUrl: product.imageUrl
+              }
+            })
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            errorCount++;
+            console.error(`Failed to sync product ${product.name}`);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`Error syncing product ${product.name}:`, error);
+        }
+      }
+
+      alert(`Catalog sync completed!\n✅ ${successCount} products synced\n❌ ${errorCount} failed`);
+    } catch (error) {
+      alert('Error syncing catalog: ' + error);
+    } finally {
+      setSyncingCatalog(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
@@ -91,10 +144,39 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Product Catalog</h2>
-          <p className="text-gray-600">
-            {products.length} product{products.length !== 1 ? 's' : ''} in your catalog
-          </p>
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Product Catalog</h2>
+              <p className="text-gray-600">
+                {products.length} product{products.length !== 1 ? 's' : ''} in your catalog
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border">
+              <h3 className="font-medium text-gray-900 mb-2">WhatsApp Catalog Sync</h3>
+              <div className="flex gap-2 items-end">
+                <div>
+                  <label className="block text-sm text-gray-600 mb-1">Catalog ID</label>
+                  <input
+                    type="text"
+                    value={catalogId}
+                    onChange={(e) => setCatalogId(e.target.value)}
+                    placeholder="Enter WhatsApp Catalog ID"
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+                <button
+                  onClick={syncToWhatsAppCatalog}
+                  disabled={syncingCatalog || !catalogId.trim()}
+                  className="bg-green-500 text-white px-4 py-2 rounded-md text-sm hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {syncingCatalog ? 'Syncing...' : 'Sync to WhatsApp'}
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Get your Catalog ID from WhatsApp Manager → Catalog
+              </p>
+            </div>
+          </div>
         </div>
 
         {products.length === 0 ? (
@@ -130,8 +212,8 @@ export default function Home() {
               <span className="text-gray-700">WhatsApp Business API - Webhook Configured</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-3 w-3 bg-yellow-400 rounded-full"></div>
-              <span className="text-gray-700">Product Catalog Sync - Pending Setup</span>
+              <div className={`h-3 w-3 rounded-full ${catalogId ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
+              <span className="text-gray-700">Product Catalog Sync - {catalogId ? 'Ready' : 'Enter Catalog ID'}</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="h-3 w-3 bg-green-400 rounded-full"></div>

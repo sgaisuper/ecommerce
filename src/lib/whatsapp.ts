@@ -109,11 +109,12 @@ export class WhatsAppAPI {
         {
           name: product.name,
           description: product.description,
-          price: product.price,
+          price: product.price * 100, // WhatsApp expects price in cents
           currency: product.currency || 'USD',
           availability: product.availability || 'in stock',
           retailer_id: product.id,
-          image_url: product.imageUrl
+          image_url: product.imageUrl,
+          url: `https://superaisg.com/product/${product.id}` // Link back to your site
         },
         {
           headers: {
@@ -125,6 +126,51 @@ export class WhatsAppAPI {
       return response.data;
     } catch (error) {
       console.error('Error creating product:', error);
+      throw error;
+    }
+  }
+
+  async getCatalog(catalogId: string) {
+    try {
+      const response = await axios.get(
+        `${WHATSAPP_API_URL}/${catalogId}/products`,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching catalog:', error);
+      throw error;
+    }
+  }
+
+  async updateProduct(catalogId: string, productId: string, updates: Partial<{ name: string; description: string; price: number; currency: string; availability: string; imageUrl: string }>) {
+    try {
+      const updateData: Record<string, unknown> = {};
+      
+      if (updates.name) updateData.name = updates.name;
+      if (updates.description) updateData.description = updates.description;
+      if (updates.price) updateData.price = updates.price * 100; // Convert to cents
+      if (updates.currency) updateData.currency = updates.currency;
+      if (updates.availability) updateData.availability = updates.availability;
+      if (updates.imageUrl) updateData.image_url = updates.imageUrl;
+
+      const response = await axios.post(
+        `${WHATSAPP_API_URL}/${catalogId}/products/${productId}`,
+        updateData,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error updating product:', error);
       throw error;
     }
   }
