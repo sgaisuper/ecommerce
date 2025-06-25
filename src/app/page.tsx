@@ -145,12 +145,22 @@ export default function Home() {
               <h1 className="text-2xl font-bold text-gray-900">WhatsApp Ecommerce</h1>
               <p className="text-gray-600">Manage your product catalog for WhatsApp Business</p>
             </div>
-            <button
-              onClick={() => setShowForm(true)}
-              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
-            >
-              Add Product
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition-colors"
+              >
+                Add Local Product
+              </button>
+              <a
+                href="https://business.whatsapp.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+              >
+                Add to WhatsApp Catalog
+              </a>
+            </div>
           </div>
         </div>
       </header>
