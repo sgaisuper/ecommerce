@@ -5,9 +5,10 @@ interface ProductCardProps {
   product: Product;
   onEdit?: (product: Product) => void;
   onDelete?: (id: string) => void;
+  onSendToWhatsApp?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
+export default function ProductCard({ product, onEdit, onDelete, onSendToWhatsApp }: ProductCardProps) {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="relative h-48 w-full">
@@ -36,26 +37,36 @@ export default function ProductCard({ product, onEdit, onDelete }: ProductCardPr
         {product.category && (
           <p className="text-sm text-gray-500 mb-3">Category: {product.category}</p>
         )}
-        {(onEdit || onDelete) && (
-          <div className="flex gap-2">
-            {onEdit && (
-              <button
-                onClick={() => onEdit(product)}
-                className="flex-1 bg-blue-500 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
-              >
-                Edit
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={() => onDelete(product.id)}
-                className="flex-1 bg-red-500 text-white px-3 py-2 rounded-md text-sm hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            )}
-          </div>
-        )}
+        <div className="space-y-2">
+          {onSendToWhatsApp && (
+            <button
+              onClick={() => onSendToWhatsApp(product)}
+              className="w-full bg-green-500 text-white px-3 py-2 rounded-md text-sm hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+            >
+              📱 Send via WhatsApp
+            </button>
+          )}
+          {(onEdit || onDelete) && (
+            <div className="flex gap-2">
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(product)}
+                  className="flex-1 bg-blue-500 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
+                >
+                  Edit
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(product.id)}
+                  className="flex-1 bg-red-500 text-white px-3 py-2 rounded-md text-sm hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

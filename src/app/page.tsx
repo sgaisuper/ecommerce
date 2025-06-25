@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import * as React from 'react';
 import { Product } from '@/types/product';
 import ProductCard from '@/components/ProductCard';
 import ProductForm from '@/components/ProductForm';
@@ -29,11 +30,41 @@ const sampleProducts: Product[] = [
 ];
 
 export default function Home() {
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
-  const [catalogId, setCatalogId] = useState<string>('');
+  const [catalogId, setCatalogId] = useState<string>('1684431495770842');
   const [syncingCatalog, setSyncingCatalog] = useState(false);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  // Load products from WhatsApp catalog on component mount
+  React.useEffect(() => {
+    const loadCatalogProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        const response = await fetch(`/api/catalog-products?catalogId=${catalogId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setProducts(data.products);
+        } else {
+          console.error('Failed to load catalog products:', data.error);
+          // Fallback to sample products if catalog fails
+          setProducts(sampleProducts);
+        }
+      } catch (error) {
+        console.error('Error loading catalog products:', error);
+        // Fallback to sample products if error
+        setProducts(sampleProducts);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    if (catalogId) {
+      loadCatalogProducts();
+    }
+  }, [catalogId]);
 
   const handleAddProduct = (productData: Omit<Product, 'id'>) => {
     const newProduct: Product = {
@@ -70,6 +101,39 @@ export default function Home() {
   const closeForm = () => {
     setShowForm(false);
     setEditingProduct(undefined);
+  };
+
+  const sendProductToWhatsApp = async (product: Product) => {
+    const phone = prompt('Enter customer phone number (with country code, e.g., +6584373362):');
+    if (!phone) return;
+    
+    try {
+      const response = await fetch('/api/send-product-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: phone,
+          product: {
+            catalogId: catalogId,
+            productId: product.id,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            currency: product.currency
+          }
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('✅ Product sent to WhatsApp successfully!');
+      } else {
+        alert('❌ Failed to send product: ' + result.error);
+      }
+    } catch (error) {
+      alert('❌ Error: ' + error);
+    }
   };
 
   const syncToWhatsAppCatalog = async () => {
@@ -179,11 +243,17 @@ export default function Home() {
           </div>
         </div>
 
-        {products.length === 0 ? (
+        {loadingProducts ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-6xl mb-4">⏳</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Loading products...</h3>
+            <p className="text-gray-600">Fetching products from WhatsApp catalog</p>
+          </div>
+        ) : products.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">📦</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products yet</h3>
-            <p className="text-gray-600 mb-4">Add your first product to get started</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600 mb-4">No products found in WhatsApp catalog</p>
             <button
               onClick={() => setShowForm(true)}
               className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition-colors"
@@ -199,6 +269,7 @@ export default function Home() {
                 product={product}
                 onEdit={openEditForm}
                 onDelete={handleDeleteProduct}
+                onSendToWhatsApp={sendProductToWhatsApp}
               />
             ))}
           </div>
