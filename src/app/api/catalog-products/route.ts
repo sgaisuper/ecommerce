@@ -32,7 +32,18 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     
     // Transform Facebook catalog products to our app format
-    const transformedProducts = data.data?.map((product: any) => ({
+    const transformedProducts = data.data?.map((product: {
+      id: string;
+      retailer_id?: string;
+      name: string;
+      description?: string;
+      price?: string;
+      currency?: string;
+      image_url?: string;
+      images?: { url: string }[];
+      availability?: string;
+      category?: string;
+    }) => ({
       id: product.retailer_id || product.id,
       name: product.name,
       description: product.description || '',
