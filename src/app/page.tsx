@@ -33,8 +33,7 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
-  const [catalogId, setCatalogId] = useState<string>('1684431495770842');
-  const [syncingCatalog, setSyncingCatalog] = useState(false);
+  const [catalogId] = useState<string>('1684431495770842');
   const [loadingProducts, setLoadingProducts] = useState(true);
 
   // Load products from WhatsApp catalog on component mount
@@ -136,56 +135,6 @@ export default function Home() {
     }
   };
 
-  const syncToWhatsAppCatalog = async () => {
-    if (!catalogId.trim()) {
-      alert('Please enter your WhatsApp Catalog ID first');
-      return;
-    }
-
-    setSyncingCatalog(true);
-    try {
-      let successCount = 0;
-      let errorCount = 0;
-
-      for (const product of products) {
-        try {
-          const response = await fetch('/api/catalog', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'create_product',
-              catalogId: catalogId.trim(),
-              product: {
-                id: product.id,
-                name: product.name,
-                description: product.description,
-                price: product.price,
-                currency: product.currency,
-                availability: product.availability,
-                imageUrl: product.imageUrl
-              }
-            })
-          });
-
-          if (response.ok) {
-            successCount++;
-          } else {
-            errorCount++;
-            console.error(`Failed to sync product ${product.name}`);
-          }
-        } catch (error) {
-          errorCount++;
-          console.error(`Error syncing product ${product.name}:`, error);
-        }
-      }
-
-      alert(`Catalog sync completed!\n✅ ${successCount} products synced\n❌ ${errorCount} failed`);
-    } catch (error) {
-      alert('Error syncing catalog: ' + error);
-    } finally {
-      setSyncingCatalog(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -216,28 +165,23 @@ export default function Home() {
               </p>
             </div>
             <div className="bg-white p-4 rounded-lg shadow-sm border">
-              <h3 className="font-medium text-gray-900 mb-2">WhatsApp Catalog Sync</h3>
-              <div className="flex gap-2 items-end">
-                <div>
-                  <label className="block text-sm text-gray-600 mb-1">Catalog ID</label>
-                  <input
-                    type="text"
-                    value={catalogId}
-                    onChange={(e) => setCatalogId(e.target.value)}
-                    placeholder="Enter WhatsApp Catalog ID"
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <button
-                  onClick={syncToWhatsAppCatalog}
-                  disabled={syncingCatalog || !catalogId.trim()}
-                  className="bg-green-500 text-white px-4 py-2 rounded-md text-sm hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  {syncingCatalog ? 'Syncing...' : 'Sync to WhatsApp'}
-                </button>
+              <h3 className="font-medium text-gray-900 mb-2">WhatsApp Catalog Status</h3>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-3 w-3 bg-green-400 rounded-full"></div>
+                <span className="text-sm text-gray-700">✅ Synced with Catalog ID: {catalogId}</span>
               </div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-3 w-3 bg-green-400 rounded-full"></div>
+                <span className="text-sm text-gray-700">✅ {products.length} products loaded from WhatsApp</span>
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-600 transition-colors"
+              >
+                🔄 Refresh Catalog
+              </button>
               <p className="text-xs text-gray-500 mt-2">
-                Get your Catalog ID from WhatsApp Manager → Catalog
+                Products are automatically synced from your WhatsApp Business catalog
               </p>
             </div>
           </div>
