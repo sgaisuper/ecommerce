@@ -19,7 +19,9 @@ export async function GET(request: NextRequest) {
       }, { status: 500 });
     }
 
-    const response = await fetch(`https://graph.facebook.com/v23.0/${catalogId}/products`, {
+    // Request specific fields to get complete product data
+    const fieldsParam = 'fields=id,retailer_id,name,description,price,currency,availability,condition,image_url,additional_image_urls,brand,category,url';
+    const response = await fetch(`https://graph.facebook.com/v23.0/${catalogId}/products?${fieldsParam}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -55,16 +57,14 @@ export async function GET(request: NextRequest) {
       let priceValue = 0;
       if (product.price) {
         const priceStr = product.price.toString();
-        // Check if price contains currency (e.g., "29.99 USD")
-        if (priceStr.includes(' ')) {
-          const [price] = priceStr.split(' ');
-          priceValue = parseFloat(price);
+        // Handle formats like "SGD999.00", "USD29.99", etc.
+        const priceMatch = priceStr.match(/([A-Z]{3})?([0-9,]+\.?\d*)/);
+        if (priceMatch) {
+          const numericPart = priceMatch[2].replace(/,/g, ''); // Remove commas
+          priceValue = parseFloat(numericPart);
         } else {
-          // Check if it's in cents (integer > 100) or dollars (decimal)
-          const numPrice = parseFloat(priceStr);
-          priceValue = numPrice > 100 && !priceStr.includes('.') 
-            ? numPrice / 100  // Convert from cents
-            : numPrice;       // Already in dollars
+          // Fallback to simple parsing
+          priceValue = parseFloat(priceStr.replace(/[^0-9.]/g, ''));
         }
       }
       
